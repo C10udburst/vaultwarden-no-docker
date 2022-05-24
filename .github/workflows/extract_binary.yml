@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ["amd64", "arm64", "armv"]
+        platform: ["amd64", "arm64", "arm"]
     steps:
       - name: Install deps
         run: |
