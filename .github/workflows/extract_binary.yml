@@ -4,6 +4,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: ["amd64", "arm64", "armv6", "armv7"]
     steps:
       - name: Install deps
         run: |
@@ -15,11 +18,11 @@ jobs:
           mkdir artifacts
       - name: Fetch and extract
         run: |
-          docker pull --platform linux/arm64/v8 vaultwarden/server:latest
-          docker run --platform linux/arm64/v8 --name "vaultwarden" -d -t vaultwarden/server
-          docker cp vaultwarden:/vaultwarden ./artifacts/vaultwarden_arm64
-      - name: Upload
-        uses: actions/upload-artifact@v2
+          docker pull --platform "linux/${{ matrix.platform }}" vaultwarden/server:latest
+          docker run --platform "linux/${{ matrix.platform }}" --name "vaultwarden" -d -t vaultwarden/server
+          docker cp vaultwarden:/vaultwarden ./artifacts/vaultwarden_${{ matrix.platform }}
+      - uses: softprops/action-gh-release@v1
         with:
-          name: vaultwarden
-          path: ./artifacts/*
+          tag_name: latest
+          files: |
+            ./artifacts/vaultwarden_${{ matrix.platform }}
