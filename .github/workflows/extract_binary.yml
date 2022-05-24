@@ -1,1 +1,25 @@
-
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install deps
+        run: |
+           sudo apt-get update -q -y
+           sudo apt-get -qq install -y qemu qemu-user-static
+           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+      - name: Setup
+        run: |
+          mkdir artifacts
+      - name: Fetch and extract
+        run: |
+          docker pull --platform linux/arm64/v8 vaultwarden/server:latest
+          docker run --platform linux/arm64/v8 --name "vaultwarden" -d -t vaultwarden/server
+          docker cp vaultwarden:/vaultwarden ./artifacts/vaultwarden_arm64
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: vaultwarden
+          path: ./artifacts/*
