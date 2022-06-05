@@ -21,8 +21,10 @@ jobs:
           docker pull --platform "linux/${{ matrix.platform }}" vaultwarden/server:latest
           docker run --platform "linux/${{ matrix.platform }}" --name "vaultwarden" -d -t vaultwarden/server
           docker cp vaultwarden:/vaultwarden ./artifacts/vaultwarden_${{ matrix.platform }}
+          sha256sum vaultwarden_${{ matrix.platform }} > vaultwarden_${{ matrix.platform }}.sha256
       - uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
           files: |
             ./artifacts/vaultwarden_${{ matrix.platform }}
+            ./artifacts/vaultwarden_${{ matrix.platform }}.sha256
