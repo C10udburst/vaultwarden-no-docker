@@ -1,0 +1,31 @@
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: ["i386"]
+    steps:
+      - name: Install deps
+        run: |
+           sudo apt-get update -q -y
+           sudo apt-get -qq install -y qemu qemu-user-static
+           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+      - name: Setup
+        run: |
+          mkdir artifacts
+      - name: Fetch and build
+        run: |
+          git clone https://github.com/dani-garcia/vaultwarden.git
+          docker run --rm --user "$(id -u)":"$(id -g)" -v "$PWD/vaultwarden":/usr/src/myapp -w /usr/src/myapp ${{ matrix.platform }}/rust cargo build --features sqlite --release
+          cp ./vaultwarden/target/release/vaultwarden ./artifacts/vaultwarden_${{ matrix.platform }}
+          cd artifacts
+          sha256sum vaultwarden_${{ matrix.platform }} > vaultwarden_${{ matrix.platform }}.sha256
+      - uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          files: |
+            ./artifacts/vaultwarden_${{ matrix.platform }}
+            ./artifacts/vaultwarden_${{ matrix.platform }}.sha256
