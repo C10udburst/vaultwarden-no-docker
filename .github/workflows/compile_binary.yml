@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ["i386", "ppc64le"]
+        platform: ["i386"]
     steps:
       - name: Install deps
         run: |
